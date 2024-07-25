@@ -10,17 +10,6 @@
 #include <vector>
 #include<map>
 
-
-enum Direction {
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT
-};
-
-extern std::map<Direction, float> directionAngle;
-
-
 // Defines a Ball object with relevant properties and methods
 class Robot
 {
@@ -28,9 +17,10 @@ public:
     // Ball state
     glm::vec2   InitialPosition, CurrentPosition, Velocity, Direction;
     float       Radius;
-    enum Direction currentDirection;
     float rotationangle;
-    int rotationcounter;
+    bool isrotating = true;
+    float targetangle = 0;
+    float angularvelocity;
     Texture2D   Sprite;
     std::vector<std::vector<unsigned int>> Path;
     unsigned int currentPathIndex = 1;
@@ -42,10 +32,9 @@ public:
     // Functions
     void Move(float dt, int x, int y, glm::vec2 targetPosition);
     void Reset(glm::vec2 position, glm::vec2 velocity);
-    void Rotaterobot(float angle, SpriteRenderer &renderer);
     void Draw(SpriteRenderer &renderer);
     void startpos();
-    void calculateDirection(int x, int y);
+    void rotateRobot(float dt, int x, int y);
 
     // Getter functions
     glm::vec2 GetPosition();

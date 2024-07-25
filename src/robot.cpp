@@ -4,12 +4,13 @@
 
 // Constructor with default values
 Robot::Robot()
-    : InitialPosition(0.0f, 0.0f), CurrentPosition(0.0f, 0.0f), Velocity(100.0f, 100.0f),Direction(0.0f,0.0f),rotationangle(0.0f),rotationcounter(0), Radius(1.0f), Sprite()
+    : InitialPosition(0.0f, 0.0f), CurrentPosition(0.0f, 0.0f), Velocity(100.0f, 100.0f),Direction(0.0f,0.0f),rotationangle(0.0f), Radius(1.0f), Sprite()
 { }
 
 // Constructor with specified values
 Robot::Robot(glm::vec2 pos, float radius, glm::vec2 velocity, Texture2D sprite)
-    : InitialPosition(pos), CurrentPosition(pos), Velocity(velocity), Radius(radius),rotationangle(0.0f), Sprite(sprite)
+    : InitialPosition(pos), CurrentPosition(pos), Velocity(velocity), Radius(radius),rotationangle(0.0f),
+     Sprite(sprite),angularvelocity(50.0f),isrotating(true)
 {}
 
 void Robot::startpos(){
@@ -20,15 +21,28 @@ void Robot::startpos(){
     }
 }
 
-void Robot::calculateDirection(int x, int y){
+
+void Robot::rotateRobot(float dt, int x, int y){
     if(x == -1){ //up 
-        rotationangle = -90.0f;
+        targetangle = -90.0f;
     } else if(x == 1){ //down
-        rotationangle = 90.0f;
+        targetangle = 90.0f;
     } else if (y == -1 ){ //right
-        rotationangle = 0.0f;
+        targetangle = 0.0f;
     } else if (y == 1){ //LEFT
-        rotationangle = 180.0f;
+        targetangle = 180.0f;
+    }
+
+    if(targetangle >= 360.0){
+        targetangle = 0.0f;
+    }
+
+    float direction = glm::normalize(targetangle - rotationangle);
+   
+    rotationangle += direction * dt * angularvelocity; 
+
+    if(std::abs(rotationangle - targetangle) < 1.0f){
+        isrotating = false;
     }
 }
 

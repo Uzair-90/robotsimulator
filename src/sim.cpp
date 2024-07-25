@@ -25,13 +25,6 @@ Sim::~Sim()
     Robots.clear();
 }
 
-std::map<Direction, float> directionAngles = {
-    {UP, 0.0f},
-    {DOWN, 180.0f},
-    {LEFT, -90.0f},
-    {RIGHT, 90.0f}
-};
-
 void Sim::Init()
 {
     // load shaders
@@ -54,7 +47,7 @@ void Sim::Init()
     Level.Load("C:/Users/Lenovo/Desktop/simulator/levels/one.lvl", this->Width, this->Height);
 
     InitialPositions = {
-        glm::vec2((0.0f * 160.0f) + 80 - RADIUS, (0.0f * 120.0f) + 60.0f - RADIUS),
+        glm::vec2((3.0f * 160.0f) + 80 - RADIUS, (1.0f * 120.0f) + 60.0f - RADIUS),
         glm::vec2((2.0f * 160.0f) + 80 - RADIUS, (0.0f * 120.0f) + 60.0f - RADIUS),
         glm::vec2((2.0f * 160.0f) + 80 - RADIUS, (4.0f * 120.0f) + 60.0f - RADIUS),
     };
@@ -62,7 +55,7 @@ void Sim::Init()
     // Configure game objects
     Robots.push_back(new Robot(InitialPositions[0], RADIUS, INITIAL_VELOCITY, ResourceManager::GetTexture("face")));
     Robots[0]->Path = {
-        {0, 0}, {0, 1}, {1, 1}, {2 , 1}, {2, 0}, {1, 0}, {0, 0}
+        {3, 1}, {3, 2}, {3, 3}, {2, 3}, {1, 3},{1, 2},{1, 1},{2 , 1}
     };
 
     Robots.push_back(new Robot(InitialPositions[1], RADIUS, INITIAL_VELOCITY, ResourceManager::GetTexture("face")));
@@ -72,7 +65,7 @@ void Sim::Init()
 
     Robots.push_back(new Robot(InitialPositions[2], RADIUS, INITIAL_VELOCITY, ResourceManager::GetTexture("face")));
     Robots[2]->Path = {
-        {2, 4}, {3, 4 }, {3, 3}
+        {2, 4}, {3, 4 }
     };
 }
 
@@ -85,18 +78,24 @@ void Sim::Update(float dt)
             int x = robot->Path[robot->currentPathIndex][0] - robot->Path[robot->currentPathIndex - 1][0];
             int y = robot->Path[robot->currentPathIndex][1] - robot->Path[robot->currentPathIndex - 1][1];
 
+           robot->rotateRobot(dt, x, y);
+
+           if(!robot->isrotating)
+           {
             glm::vec2 targetPosition = glm::vec2(robot->InitialPosition.x + (x * 160.0f), robot->InitialPosition.y + (y * 120.0f));
             glm::vec2 currentPosition = robot->GetPosition();
 
             // Check if the robot has reached the target position
             if (glm::distance(currentPosition, targetPosition) < 1.0f) {
                 // Move to the next target position
+                robot->isrotating = true;
                 robot->InitialPosition = currentPosition;
                 robot->currentPathIndex++;
             }
             // Update the robot's position
             robot->Move(dt,x , y, targetPosition);
-            robot->calculateDirection(x,y);
+            }
+            
         }
     }
 
