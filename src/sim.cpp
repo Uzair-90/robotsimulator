@@ -46,27 +46,23 @@ void Sim::Init()
     // load levels
     Level.Load("C:/Users/Lenovo/Desktop/simulator/levels/one.lvl", this->Width, this->Height);
 
-    InitialPositions = {
-        glm::vec2((3.0f * 160.0f) + 80 - RADIUS, (1.0f * 120.0f) + 60.0f - RADIUS),
-        glm::vec2((2.0f * 160.0f) + 80 - RADIUS, (0.0f * 120.0f) + 60.0f - RADIUS),
-        glm::vec2((2.0f * 160.0f) + 80 - RADIUS, (4.0f * 120.0f) + 60.0f - RADIUS),
-    };
-
     // Configure game objects
-    Robots.push_back(new Robot(InitialPositions[0], RADIUS, INITIAL_VELOCITY, ResourceManager::GetTexture("face")));
-    Robots[0]->Path = {
-        {3, 1}, {3, 2}, {3, 3}, {2, 3}, {1, 3},{1, 2},{1, 1},{2 , 1}
-    };
+    Robots.push_back(new Robot());
+    
+    Robots[0]->findPath({3,1}, {0,4});
 
-    Robots.push_back(new Robot(InitialPositions[1], RADIUS, INITIAL_VELOCITY, ResourceManager::GetTexture("face")));
-    Robots[1]->Path = {
-        {2, 0}, {2, 1}, {3, 1}
-    };
+    Robots[0]->startpos();
 
-    Robots.push_back(new Robot(InitialPositions[2], RADIUS, INITIAL_VELOCITY, ResourceManager::GetTexture("face")));
-    Robots[2]->Path = {
-        {2, 4}, {3, 4 }
-    };
+    Robots.push_back(new Robot());
+    
+    Robots[1]->findPath({3,4},{1,3});
+    Robots[1]->startpos();
+
+    Robots.push_back(new Robot());
+    
+    Robots[2]->findPath({0,2},{2,4});
+
+    Robots[2]->startpos();
 }
 
 void Sim::Update(float dt)
@@ -99,7 +95,6 @@ void Sim::Update(float dt)
         }
     }
 
-    // Other game update logic...
 }
 
 
