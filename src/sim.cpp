@@ -5,6 +5,7 @@
 #include "robot.h"
 #include <iostream>
 #include <cmath>
+#include "jointastar.h"
 
 // Game-related State data
 SpriteRenderer  *Renderer, *renderer2;
@@ -46,56 +47,97 @@ void Sim::Init()
     // load levels
     Level.Load("C:/Users/Lenovo/Desktop/simulator/levels/one.lvl", this->Width, this->Height);
 
-    // Configure game objects
-    Robots.push_back(new Robot());
-    
-    Robots[0]->findPath({3,1}, {0,4});
+    for(int i = 0; i < 4; i++){
+        Robots.push_back(new Robot());
+    }
 
-    Robots[0]->startpos();
+    int n = 6;  // Grid size
+    vector<Point> starts = {{2, 3}, {2, 1}, {3, 4}, {2,5}};
+    vector<Point> goals = {{4, 2}, {4, 4}, {4, 1}, {0, 0}};
 
-    Robots.push_back(new Robot());
-    
-    Robots[1]->findPath({3,4},{1,3});
-    Robots[1]->startpos();
+    vector<vector<Point>> path = jointStateAStar(starts, goals, n);
 
-    Robots.push_back(new Robot());
-    
-    Robots[2]->findPath({0,2},{2,4});
+    // Print the found path or indicate no path found
+    if (!path.empty()) {
+        cout << "Path found:" << endl;
 
-    Robots[2]->startpos();
+        // Vector to store each column as a separate path
+        vector<vector<Point>> agentPaths(path[0].size());
+
+        for (const auto& state : path) {
+            for (size_t col = 0; col < state.size(); ++col) {
+                agentPaths[col].push_back(state[col]);
+            }
+        }
+
+        // Display each separated path (each column) horizontally
+        cout << "\nAgent paths (each column):" << endl;
+        for (size_t col = 0; col < agentPaths.size(); ++col) {
+            cout << "Agent " << col << ": ";
+            for (const auto& pos : agentPaths[col]) {
+                cout << "(" << pos.x << "," << pos.y << ") ";
+                if (col < Robots.size()) {
+                    cout<<"Pushing path for robot: "<<col<<"\n";
+                    Robots[col]->Path.push_back({pos.x, pos.y});
+                }
+            }
+            cout << endl;
+        }
+
+        int x = 0;
+        // Call startpos for each robot
+        for (auto& robot : Robots) {
+            if (robot) {
+                robot->startpos();
+                cout<<"Calculating stating position for robot: "<< x <<"\n";
+                x++;
+            }
+        }
+    } else {
+        cout << "No path found." << endl;
+    }
+
+
 }
 
 void Sim::Update(float dt)
-{  
+{
+    //int i = 0;
     // Update each robot
     for (auto robot : Robots) {
-        
-        if (robot->currentPathIndex < robot->Path.size()) {
-            int x = robot->Path[robot->currentPathIndex][0] - robot->Path[robot->currentPathIndex - 1][0];
-            int y = robot->Path[robot->currentPathIndex][1] - robot->Path[robot->currentPathIndex - 1][1];
 
-           robot->rotateRobot(dt, x, y);
+        //cout<<"Starting simulation for robot: "<<i<<"\n";
+        //i++;
 
-           if(!robot->isrotating)
-           {
-            glm::vec2 targetPosition = glm::vec2(robot->InitialPosition.x + (x * 160.0f), robot->InitialPosition.y + (y * 120.0f));
-            glm::vec2 currentPosition = robot->GetPosition();
+        if (robot->currentPathIndex < robot->Path.size()) { // Ensure there is a next point in the path
 
-            // Check if the robot has reached the target position
-            if (glm::distance(currentPosition, targetPosition) < 1.0f) {
-                // Move to the next target position
-                robot->isrotating = true;
-                robot->InitialPosition = currentPosition;
-                robot->currentPathIndex++;
+            int x = robot->Path[robot->currentPathIndex ][0] - robot->Path[robot->currentPathIndex - 1][0];
+            int y = robot->Path[robot->currentPathIndex ][1] - robot->Path[robot->currentPathIndex - 1][1];
+
+            robot->rotateRobot(dt, x, y);
+
+            if (!robot->isrotating)
+            {
+                glm::vec2 targetPosition = glm::vec2(robot->InitialPosition.x + (x * 100.0f), robot->InitialPosition.y + (y * 100.0f));
+                glm::vec2 currentPosition = robot->GetPosition();
+
+                // Check if the robot has reached the target position
+                if (glm::distance(currentPosition, targetPosition) < 1.0f) {
+                    // Move to the next target position
+                    robot->isrotating = true;
+                    robot->InitialPosition = currentPosition;
+                    robot->currentPathIndex++;
+                } 
+                    // Update the robot's position
+                robot->Move(dt, x, y, targetPosition);
+                
             }
-            // Update the robot's position
-            robot->Move(dt,x , y, targetPosition);
-            }
-            
         }
     }
-
 }
+
+
+
 
 
 void Sim::Render()
@@ -103,9 +145,10 @@ void Sim::Render()
     // Draw background, levels, and all robots
     Renderer->DrawSprite(ResourceManager::GetTexture("background"), glm::vec2(0.0f, 0.0f), glm::vec2(this->Width, this->Height), 0.0f);
     this->Level.Draw(*Renderer);
-
     for (auto robot : Robots) {
+
         robot->Draw(*renderer2); 
     }
+    
 }
 

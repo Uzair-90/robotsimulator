@@ -16,8 +16,7 @@ class Sim
 public:
     // game state
     unsigned int Width, Height;
-    Grid  Level;
-    
+    Grid  Level;  
     // constructor/destructor
     Sim(unsigned int width, unsigned int height);
     ~Sim();
@@ -26,7 +25,6 @@ public:
     // game loop
     void Update(float dt);
     void Render();
-    //void DoCollisions();
 
 private:
     std::vector<Robot*> Robots;

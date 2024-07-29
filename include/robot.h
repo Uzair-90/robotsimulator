@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include "texture.h"
 #include "sprite_renderer.h"
-#include "AStar.hpp"
 #include <vector>
 #include<map>
 
@@ -23,7 +22,6 @@ public:
     float targetangle = 0;
     float angularvelocity;
     Texture2D   Sprite;
-    AStar::Generator generator;
     std::vector<std::vector<int>> Path;
     unsigned int currentPathIndex = 1;
 
@@ -37,7 +35,6 @@ public:
     void Draw(SpriteRenderer &renderer);
     void startpos();
     void rotateRobot(float dt, int x, int y);
-    void findPath(std::pair<int, int> start, std::pair<int, int> goal);
 
     // Getter functions
     glm::vec2 GetPosition();
